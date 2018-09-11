@@ -292,6 +292,42 @@ checkNode:
 	return ""
 }
 
+func (r Root) TextAll() string {
+	val := ""
+	k := r.Pointer.FirstChild
+checkNode:
+	if k.Type != html.TextNode {
+		k = k.NextSibling
+		if k == nil {
+			if debug {
+				panic("No text node found")
+			}
+			return ""
+		}
+		goto checkNode
+	}
+	if k != nil {
+		r, _ := regexp.Compile(`^\s+$`)
+		if ok := r.MatchString(k.Data); ok {
+			k = k.NextSibling
+			if k == nil {
+				if debug {
+					panic("No text node found")
+				}
+				return ""
+			}
+			goto checkNode
+		} else {
+			val += k.Data
+			k = k.NextSibling
+			if k != nil {
+				goto checkNode
+			}
+		}
+	}
+	return val
+}
+
 // Using depth first search to find the first occurrence and return
 func findOnce(n *html.Node, args []string, uni bool, strict bool) (*html.Node, bool) {
 	if uni == true {
